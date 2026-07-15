@@ -1,0 +1,6 @@
+{
+  "name": "System Design Daily",
+  "description": "A daily structured course and progress tracker for learning System Design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
