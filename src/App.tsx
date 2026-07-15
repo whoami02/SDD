@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { curriculum } from './data';
 import { DayPlan } from './types';
 import { cn } from './lib/utils';
 import { CheckCircle2, Circle, Clock, Layout, Bell, ChevronRight, Menu, X, Check, ExternalLink, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from './contexts/AuthContext';
+import Header from './components/Header';
+import { saveProgress, loadProgress } from './lib/firestore';
 
 export default function App() {
+  const { user } = useAuth();
   const [selectedDay, setSelectedDay] = useState<number>(1);
   const [completedTopics, setCompletedTopics] = useState<Record<string, boolean>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -13,23 +17,41 @@ export default function App() {
   const [collapsedPhases, setCollapsedPhases] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const saved = localStorage.getItem('system-design-progress');
-    if (saved) {
-      try {
-        setCompletedTopics(JSON.parse(saved));
-      } catch (e) {
-        console.error('Failed to parse progress', e);
+    async function init() {
+      if (user) {
+        const cloud = await loadProgress(user.uid);
+        const local = localStorage.getItem('system-design-progress');
+        const localParsed = local ? JSON.parse(local) : {};
+        const merged = { ...localParsed, ...cloud };
+        setCompletedTopics(merged);
+        localStorage.setItem('system-design-progress', JSON.stringify(merged));
+        if (Object.keys(cloud).length === 0 && Object.keys(localParsed).length > 0) {
+          await saveProgress(user.uid, localParsed);
+        }
+      } else {
+        const saved = localStorage.getItem('system-design-progress');
+        if (saved) {
+          try {
+            setCompletedTopics(JSON.parse(saved));
+          } catch (e) {
+            console.error('Failed to parse progress', e);
+          }
+        }
       }
     }
-  }, []);
+    init();
+  }, [user]);
 
-  const toggleTopic = (topicId: string) => {
+  const toggleTopic = async (topicId: string) => {
     const newProgress = {
       ...completedTopics,
       [topicId]: !completedTopics[topicId]
     };
     setCompletedTopics(newProgress);
     localStorage.setItem('system-design-progress', JSON.stringify(newProgress));
+    if (user) {
+      await saveProgress(user.uid, newProgress);
+    }
   };
 
   const togglePhase = (phaseId: string) => {
@@ -208,6 +230,7 @@ export default function App() {
             <ChevronRight size={14} />
             <span className="text-slate-600">Day {selectedDay}</span>
           </nav>
+          <Header />
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-thin scrollbar-thumb-slate-200">
