@@ -1,6 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
+import { resolveAssetUrl } from '../lib/utils';
 
 interface MarkdownRendererProps {
   content: string;
@@ -8,6 +9,13 @@ interface MarkdownRendererProps {
 }
 
 const components: Components = {
+  img: ({ src, alt }) => (
+    <img
+      src={resolveAssetUrl(src || '')}
+      alt={alt || ''}
+      className="max-w-full h-auto rounded-xl border border-slate-200 bg-white p-2 my-4 shadow-sm object-contain"
+    />
+  ),
   h1: ({ children }) => (
     <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-4 mt-8 first:mt-0">
       {children}

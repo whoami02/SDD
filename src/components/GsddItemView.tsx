@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, Circle, BookOpen, Layout, Star, X, ZoomIn } from 'lucide-react';
 import { GsddItem, GsddDesign } from '../types';
 import MarkdownRenderer from './MarkdownRenderer';
-import { cn } from '../lib/utils';
+import { cn, resolveAssetUrl } from '../lib/utils';
+
 
 interface GsddItemViewProps {
   item: GsddItem;
@@ -167,14 +168,14 @@ export default function GsddItemView({ item, isRead, onToggleRead }: GsddItemVie
             >
               {activeTab === 'overview' && design.overviewImage && (
                 <DiagramImage
-                  src={design.overviewImage}
+                  src={resolveAssetUrl(design.overviewImage)}
                   alt={`${item.title} — Overview Architecture`}
                   label="Overview Architecture"
                 />
               )}
               {activeTab === 'detail' && design.detailImage && (
                 <DiagramImage
-                  src={design.detailImage}
+                  src={resolveAssetUrl(design.detailImage)}
                   alt={`${item.title} — Detailed Architecture`}
                   label="Detailed Architecture"
                 />
